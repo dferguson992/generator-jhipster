@@ -5,7 +5,6 @@ const fse = require('fs-extra');
 
 const expectedFiles = {
     sccconfig: ['./ocp/registry/scc-config.yml'],
-    elk: ['./ocp/monitoring/jhipster-monitoring.yml'],
     eurekaregistry: ['./ocp/registry/jhipster-registry.yml', './ocp/registry/application-configmap.yml'],
     consulregistry: ['./ocp/registry/consul.yml', './ocp/registry/application-configmap.yml'],
     applcgw: ['./ocp/jhgate/jhgate-deployment.yml', './ocp/jhgate/jhgate-mysql.yml'],
@@ -17,13 +16,13 @@ const expectedFiles = {
     monolith: [
         './ocp/samplemysql/samplemysql-deployment.yml',
         './ocp/samplemysql/samplemysql-mysql.yml',
-        './ocp/samplemysql/samplemysql-elasticsearch.yml'
-    ]
+        './ocp/samplemysql/samplemysql-elasticsearch.yml',
+    ],
 };
 
 describe('JHipster OpenShift Sub Generator', () => {
     describe('only gateway', () => {
-        beforeEach(done => {
+        before(done => {
             helpers
                 .run(require.resolve('../generators/openshift'))
                 .inTmpDir(dir => {
@@ -31,14 +30,14 @@ describe('JHipster OpenShift Sub Generator', () => {
                 })
                 .withOptions({ skipChecks: true })
                 .withPrompts({
-                    composeApplicationType: 'microservice',
+                    deploymentApplicationType: 'microservice',
                     directoryPath: './',
                     chosenApps: ['01-gateway'],
                     adminPassword: 'openshiftpaas',
                     dockerRepositoryName: 'ocrepo',
                     dockerPushCommand: 'docker push',
                     openshiftNamespace: 'default',
-                    monitoring: 'no'
+                    monitoring: 'no',
                 })
                 .on('end', done);
         });
@@ -56,7 +55,7 @@ describe('JHipster OpenShift Sub Generator', () => {
     });
 
     describe('gateway and one microservice with mysql', () => {
-        beforeEach(done => {
+        before(done => {
             helpers
                 .run(require.resolve('../generators/openshift'))
                 .inTmpDir(dir => {
@@ -64,13 +63,13 @@ describe('JHipster OpenShift Sub Generator', () => {
                 })
                 .withOptions({ skipChecks: true })
                 .withPrompts({
-                    composeApplicationType: 'microservice',
+                    deploymentApplicationType: 'microservice',
                     directoryPath: './',
                     chosenApps: ['01-gateway', '02-mysql'],
                     dockerRepositoryName: 'ocrepo',
                     dockerPushCommand: 'docker push',
                     openshiftNamespace: 'default',
-                    monitoring: 'no'
+                    monitoring: 'no',
                 })
                 .on('end', done);
         });
@@ -88,8 +87,8 @@ describe('JHipster OpenShift Sub Generator', () => {
         });
     });
 
-    describe('gateway and one microservice with mysql and elk', () => {
-        beforeEach(done => {
+    describe('gateway and one microservice with mysql', () => {
+        before(done => {
             helpers
                 .run(require.resolve('../generators/openshift'))
                 .inTmpDir(dir => {
@@ -97,13 +96,12 @@ describe('JHipster OpenShift Sub Generator', () => {
                 })
                 .withOptions({ skipChecks: true })
                 .withPrompts({
-                    composeApplicationType: 'microservice',
+                    deploymentApplicationType: 'microservice',
                     directoryPath: './',
                     chosenApps: ['01-gateway', '02-mysql'],
                     dockerRepositoryName: 'ocrepo',
                     dockerPushCommand: 'docker push',
                     openshiftNamespace: 'default',
-                    monitoring: 'elk'
                 })
                 .on('end', done);
         });
@@ -119,13 +117,10 @@ describe('JHipster OpenShift Sub Generator', () => {
         it('creates expected msmysql files', () => {
             assert.file(expectedFiles.msmysql);
         });
-        it('creates expected elk files', () => {
-            assert.file(expectedFiles.elk);
-        });
     });
 
     describe('two microservices backed by mysql and postgres without gateway', () => {
-        beforeEach(done => {
+        before(done => {
             helpers
                 .run(require.resolve('../generators/openshift'))
                 .inTmpDir(dir => {
@@ -133,13 +128,13 @@ describe('JHipster OpenShift Sub Generator', () => {
                 })
                 .withOptions({ skipChecks: true })
                 .withPrompts({
-                    composeApplicationType: 'microservice',
+                    deploymentApplicationType: 'microservice',
                     directoryPath: './',
                     chosenApps: ['02-mysql', '03-psql'],
                     dockerRepositoryName: 'ocrepo',
                     dockerPushCommand: 'docker push',
                     openshiftNamespace: 'default',
-                    monitoring: 'no'
+                    monitoring: 'no',
                 })
                 .on('end', done);
         });
@@ -161,7 +156,7 @@ describe('JHipster OpenShift Sub Generator', () => {
     });
 
     describe('gateway with multiple microservices backed by mysql, postgres, mongo, cassandra and mariadb', () => {
-        beforeEach(done => {
+        before(done => {
             helpers
                 .run(require.resolve('../generators/openshift'))
                 .inTmpDir(dir => {
@@ -169,12 +164,12 @@ describe('JHipster OpenShift Sub Generator', () => {
                 })
                 .withOptions({ skipChecks: true })
                 .withPrompts({
-                    composeApplicationType: 'microservice',
+                    deploymentApplicationType: 'microservice',
                     directoryPath: './',
                     chosenApps: ['01-gateway', '02-mysql', '03-psql', '04-mongo', '05-cassandra', '07-mariadb'],
                     dockerRepositoryName: 'ocrepo',
                     dockerPushCommand: 'docker push',
-                    openshiftNamespace: 'default'
+                    openshiftNamespace: 'default',
                 })
                 .on('end', done);
         });
@@ -205,7 +200,7 @@ describe('JHipster OpenShift Sub Generator', () => {
     });
 
     describe('monolith application', () => {
-        beforeEach(done => {
+        before(done => {
             helpers
                 .run(require.resolve('../generators/openshift'))
                 .inTmpDir(dir => {
@@ -213,12 +208,12 @@ describe('JHipster OpenShift Sub Generator', () => {
                 })
                 .withOptions({ skipChecks: true })
                 .withPrompts({
-                    composeApplicationType: 'monolith',
+                    deploymentApplicationType: 'monolith',
                     directoryPath: './',
                     chosenApps: ['08-monolith'],
                     dockerRepositoryName: 'ocrepo',
                     dockerPushCommand: 'docker push',
-                    openshiftNamespace: 'default'
+                    openshiftNamespace: 'default',
                 })
                 .on('end', done);
         });
@@ -230,8 +225,8 @@ describe('JHipster OpenShift Sub Generator', () => {
         });
     });
 
-    describe('monolith application with elk', () => {
-        beforeEach(done => {
+    describe('monolith application', () => {
+        before(done => {
             helpers
                 .run(require.resolve('../generators/openshift'))
                 .inTmpDir(dir => {
@@ -239,13 +234,12 @@ describe('JHipster OpenShift Sub Generator', () => {
                 })
                 .withOptions({ skipChecks: true })
                 .withPrompts({
-                    composeApplicationType: 'monolith',
+                    deploymentApplicationType: 'monolith',
                     directoryPath: './',
                     chosenApps: ['08-monolith'],
                     dockerRepositoryName: 'ocrepo',
                     dockerPushCommand: 'docker push',
                     openshiftNamespace: 'default',
-                    monitoring: 'elk'
                 })
                 .on('end', done);
         });
@@ -254,9 +248,6 @@ describe('JHipster OpenShift Sub Generator', () => {
         });
         it('creates expected scc files', () => {
             assert.file(expectedFiles.sccconfig);
-        });
-        it('creates expected elk files', () => {
-            assert.file(expectedFiles.elk);
         });
     });
 });

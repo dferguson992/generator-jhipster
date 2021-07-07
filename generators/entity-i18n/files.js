@@ -1,5 +1,5 @@
 /**
- * Copyright 2013-2018 the original author or authors from the JHipster project.
+ * Copyright 2013-2020 the original author or authors from the JHipster project.
  *
  * This file is part of the JHipster project, see https://www.jhipster.tech/
  * for more information.
@@ -24,7 +24,7 @@ const utils = require('../utils');
  */
 
 module.exports = {
-    writeFiles
+    writeFiles,
 };
 
 function writeFiles() {
@@ -32,13 +32,17 @@ function writeFiles() {
         writeEnumFiles() {
             this.fields.forEach(field => {
                 if (field.fieldIsEnum === true) {
-                    const enumInfo = utils.buildEnumInfo(field, this.angularAppName, this.packageName, this.clientRootFolder);
+                    const enumInfo = {
+                        ...utils.getEnumInfo(field, this.clientRootFolder),
+                        frontendAppName: this.frontendAppName,
+                        packageName: this.packageName,
+                    };
 
                     // Copy for each
                     if (!this.skipClient && this.enableTranslation) {
                         const languages = this.languages || this.getAllInstalledLanguages();
                         languages.forEach(language => {
-                            this.copyEnumI18n(language, enumInfo);
+                            this.copyEnumI18n(language, enumInfo, this.fetchFromInstalledJHipster('entity-i18n/templates'));
                         });
                     }
                 }
@@ -52,9 +56,9 @@ function writeFiles() {
             if (this.enableTranslation) {
                 const languages = this.languages || this.getAllInstalledLanguages();
                 languages.forEach(language => {
-                    this.copyI18n(language);
+                    this.copyI18n(language, this.fetchFromInstalledJHipster('entity-i18n/templates'));
                 });
             }
-        }
+        },
     };
 }

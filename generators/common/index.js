@@ -1,5 +1,5 @@
 /**
- * Copyright 2013-2018 the original author or authors from the JHipster project.
+ * Copyright 2013-2020 the original author or authors from the JHipster project.
  *
  * This file is part of the JHipster project, see https://www.jhipster.tech/
  * for more information.
@@ -17,198 +17,116 @@
  * limitations under the License.
  */
 /* eslint-disable consistent-return */
-const BaseGenerator = require('../generator-base');
+const BaseBlueprintGenerator = require('../generator-base-blueprint');
 const writeFiles = require('./files').writeFiles;
-const packagejs = require('../../package.json');
+const prettierConfigFiles = require('./files').prettierConfigFiles;
 const constants = require('../generator-constants');
 
-let useBlueprint;
+let useBlueprints;
 
-module.exports = class extends BaseGenerator {
+module.exports = class JHipsterCommonGenerator extends BaseBlueprintGenerator {
     constructor(args, opts) {
         super(args, opts);
 
-        this.configOptions = this.options.configOptions || {};
         // This adds support for a `--from-cli` flag
         this.option('from-cli', {
             desc: 'Indicates the command is run from JHipster CLI',
             type: Boolean,
-            defaults: false
+            defaults: false,
         });
 
-        this.setupServerOptions(this);
-        const blueprint = this.options.blueprint || this.configOptions.blueprint || this.config.get('blueprint');
-        if (!opts.fromBlueprint) {
-            // use global variable since getters dont have access to instance property
-            useBlueprint = this.composeBlueprint(blueprint, 'common', {
-                'from-cli': this.options['from-cli'],
-                configOptions: this.configOptions,
-                force: this.options.force
-            });
-        } else {
-            useBlueprint = false;
+        if (this.options.help) {
+            return;
         }
+
+        this.loadStoredAppOptions();
+        this.loadRuntimeOptions();
+
+        useBlueprints = !this.fromBlueprint && this.instantiateBlueprints('common');
     }
 
     // Public API method used by the getter and also by Blueprints
     _initializing() {
         return {
             validateFromCli() {
-                if (!this.options['from-cli']) {
-                    this.error('This JHipster subgenerator is not intented for standalone use.');
-                }
+                this.checkInvocationFromCLI();
             },
 
-            setupConsts() {
+            setupConstants() {
                 // Make constants available in templates
+                this.MAIN_DIR = constants.MAIN_DIR;
                 this.TEST_DIR = constants.TEST_DIR;
-                this.CLIENT_MAIN_SRC_DIR = constants.CLIENT_MAIN_SRC_DIR;
                 this.SERVER_MAIN_RES_DIR = constants.SERVER_MAIN_RES_DIR;
-
-                this.packagejs = packagejs;
-                const configuration = this.getAllJhipsterConfig(this, true);
-                this.applicationType = configuration.get('applicationType') || this.configOptions.applicationType;
-                if (!this.applicationType) {
-                    this.applicationType = 'monolith';
-                }
-                this.serverPort = configuration.get('serverPort');
-                if (this.serverPort === undefined) {
-                    this.serverPort = '8080';
-                }
-
-                this.enableSwaggerCodegen = configuration.get('enableSwaggerCodegen');
-
-                this.serviceDiscoveryType =
-                    configuration.get('serviceDiscoveryType') === 'no' ? false : configuration.get('serviceDiscoveryType');
-                if (this.serviceDiscoveryType === undefined) {
-                    this.serviceDiscoveryType = false;
-                }
-
-                this.databaseType = configuration.get('databaseType');
-                if (this.databaseType === 'mongodb') {
-                    this.prodDatabaseType = 'mongodb';
-                } else if (this.databaseType === 'couchbase') {
-                    this.prodDatabaseType = 'couchbase';
-                } else if (this.databaseType === 'cassandra') {
-                    this.prodDatabaseType = 'cassandra';
-                } else if (this.databaseType === 'no') {
-                    // no database, only available for microservice applications
-                    this.prodDatabaseType = 'no';
-                } else {
-                    // sql
-                    this.prodDatabaseType = configuration.get('prodDatabaseType');
-                }
-
-                this.buildTool = configuration.get('buildTool');
-                this.jhipsterVersion = packagejs.version;
-                if (this.jhipsterVersion === undefined) {
-                    this.jhipsterVersion = configuration.get('jhipsterVersion');
-                }
-                this.authenticationType = configuration.get('authenticationType');
-                this.clientFramework = configuration.get('clientFramework');
-                const testFrameworks = configuration.get('testFrameworks');
-                if (testFrameworks) {
-                    this.testFrameworks = testFrameworks;
-                }
-
-                const baseName = configuration.get('baseName');
-                if (baseName) {
-                    // to avoid overriding name from configOptions
-                    this.baseName = baseName;
-                }
+                this.ANGULAR = constants.SUPPORTED_CLIENT_FRAMEWORKS.ANGULAR;
 
                 // Make documentation URL available in templates
                 this.DOCUMENTATION_URL = constants.JHIPSTER_DOCUMENTATION_URL;
-                this.DOCUMENTATION_ARCHIVE_URL = `${constants.JHIPSTER_DOCUMENTATION_URL + constants.JHIPSTER_DOCUMENTATION_ARCHIVE_PATH}v${
-                    this.jhipsterVersion
-                }`;
-            }
+                this.DOCUMENTATION_ARCHIVE_PATH = constants.JHIPSTER_DOCUMENTATION_ARCHIVE_PATH;
+            },
         };
     }
 
     get initializing() {
-        if (useBlueprint) return;
+        if (useBlueprints) return;
         return this._initializing();
     }
 
     // Public API method used by the getter and also by Blueprints
-    _prompting() {
-        return {};
-    }
-
-    get prompting() {
-        if (useBlueprint) return;
-        return this._prompting();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _configuring() {
+    _loading() {
         return {
-            setSharedConfigOptions() {
-                // Make dist dir available in templates
-                if (this.buildTool === 'maven') {
-                    this.BUILD_DIR = 'target/';
-                } else {
-                    this.BUILD_DIR = 'build/';
-                }
-                this.CLIENT_DIST_DIR = this.BUILD_DIR + constants.CLIENT_DIST_DIR;
-            }
+            loadSharedConfig() {
+                this.loadAppConfig();
+                this.loadClientConfig();
+                this.loadServerConfig();
+                this.loadTranslationConfig();
+            },
         };
     }
 
-    get configuring() {
-        if (useBlueprint) return;
-        return this._configuring();
+    get loading() {
+        if (useBlueprints) return;
+        return this._loading();
+    }
+
+    // Public API method used by the getter and also by Blueprints
+    _preparing() {
+        return {
+            prepareForTemplates() {
+                this.BUILD_DIR = this.getBuildDirectoryForBuildTool(this.buildTool);
+                this.CLIENT_DIST_DIR = this.getResourceBuildDirectoryForBuildTool(this.buildTool) + constants.CLIENT_DIST_DIR;
+            },
+        };
+    }
+
+    get preparing() {
+        if (useBlueprints) return;
+        return this._preparing();
     }
 
     // Public API method used by the getter and also by Blueprints
     _default() {
         return {
-            getSharedConfigOptions() {
-                if (this.configOptions.clientFramework) {
-                    this.clientFramework = this.configOptions.clientFramework;
-                }
-                this.testFrameworks = [];
-                if (this.configOptions.testFrameworks) {
-                    this.testFrameworks = this.configOptions.testFrameworks;
-                }
-                this.protractorTests = this.testFrameworks.includes('protractor');
-                this.gatlingTests = this.testFrameworks.includes('gatling');
-            }
+            ...super._missingPreDefault(),
+
+            writePrettierConfig() {
+                // Prettier configuration needs to be the first written files - all subgenerators considered - for prettier transform to work
+                this.writeFilesToDisk(prettierConfigFiles, this, false, this.fetchFromInstalledJHipster('common/templates'));
+            },
         };
     }
 
     get default() {
-        if (useBlueprint) return;
+        if (useBlueprints) return;
         return this._default();
     }
 
     // Public API method used by the getter and also by Blueprints
     _writing() {
-        return writeFiles();
+        return { ...writeFiles(), ...super._missingPostWriting() };
     }
 
     get writing() {
-        if (useBlueprint) return;
+        if (useBlueprints) return;
         return this._writing();
-    }
-
-    _install() {
-        return {};
-    }
-
-    get install() {
-        if (useBlueprint) return;
-        return this._install();
-    }
-
-    // Public API method used by the getter and also by Blueprints
-    _end() {
-        return {};
-    }
-
-    get end() {
-        if (useBlueprint) return;
-        return this._end();
     }
 };

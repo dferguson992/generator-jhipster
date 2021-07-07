@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2018 the original author or authors from the JHipster project.
+ Copyright 2013-2020 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,65 +16,74 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-    <%= entityInstancePlural %>: I<%= entityAngularName %>[];
-    currentAccount: any;
-    eventSubscriber: Subscription;
-    <%_ if (searchEngine === 'elasticsearch') { _%>
+    <%= entityInstancePlural %>?: I<%= entityAngularName %>[];
+    eventSubscriber?: Subscription;
+    isLoading = false;
+    <%_ if (searchEngine !== false) { _%>
     currentSearch: string;
     <%_ } _%>
 
     constructor(
-        private <%= entityInstance %>Service: <%= entityAngularName %>Service,
-        private jhiAlertService: JhiAlertService,
+        protected <%= entityInstance %>Service: <%= entityAngularName %>Service,
         <%_ if (fieldsContainBlob) { _%>
-        private dataUtils: JhiDataUtils,
+        protected dataUtils: JhiDataUtils,
         <%_ } _%>
-        private eventManager: JhiEventManager,
-        <%_ if (searchEngine === 'elasticsearch') { _%>
-        private activatedRoute: ActivatedRoute,
+        protected eventManager: JhiEventManager,
+        <%_ if (!readOnly) { _%>
+        protected modalService: NgbModal,
         <%_ } _%>
-        private principal: Principal
+        <%_ if (searchEngine !== false) { _%>
+        protected activatedRoute: ActivatedRoute,
+        <%_ } _%>
     ) {
-        <%_ if (searchEngine === 'elasticsearch') { _%>
-        this.currentSearch = this.activatedRoute.snapshot && this.activatedRoute.snapshot.params['search'] ?
-            this.activatedRoute.snapshot.params['search'] : '';
+        <%_ if (searchEngine !== false) { _%>
+        this.currentSearch = this.activatedRoute.snapshot && this.activatedRoute.snapshot.queryParams['search'] ?
+            this.activatedRoute.snapshot.queryParams['search'] : '';
         <%_ } _%>
     }
 
-    loadAll() {
-        <%_ if (searchEngine === 'elasticsearch') { _%>
+    loadAll(): void {
+        this.isLoading = true;
+        <%_ if (searchEngine !== false) { _%>
         if (this.currentSearch) {
             this.<%= entityInstance %>Service.search({
                 query: this.currentSearch,
                 }).subscribe(
-                    (res: HttpResponse<I<%= entityAngularName %>[]>) => this.<%= entityInstancePlural %> = res.body,
-                    (res: HttpErrorResponse) => this.onError(res.message)
+                    (res: HttpResponse<I<%= entityAngularName %>[]>) => {
+                        this.isLoading = false;
+                        this.<%= entityInstancePlural %> = res.body || [];
+                    },
+                    () => {
+                        this.isLoading = false;
+                    }
                 );
             return;
-       }
-       <%_ } _%>
+        }
+        <%_ } _%>
+
         this.<%= entityInstance %>Service.query().subscribe(
             (res: HttpResponse<I<%= entityAngularName %>[]>) => {
-                this.<%= entityInstancePlural %> = res.body;
-                <%_ if (searchEngine === 'elasticsearch') { _%>
-                this.currentSearch = '';
-                <%_ } _%>
+                this.isLoading = false;
+                this.<%= entityInstancePlural %> = res.body || [];
             },
-            (res: HttpErrorResponse) => this.onError(res.message)
+            () => {
+                this.isLoading = false;
+            }
         );
     }
-    <%_ if (searchEngine === 'elasticsearch') { _%>
 
-    search(query) {
-        if (!query) {
-            return this.clear();
-        }
+    handleSyncList(): void {
+        this.loadAll();
+    }
+
+    <%_ if (searchEngine !== false) { _%>
+    search(query: string): void {
         this.currentSearch = query;
         this.loadAll();
     }
-
-    clear() {
-        this.currentSearch = '';
-        this.loadAll();
-    }
     <%_ } _%>
+
+    ngOnInit(): void {
+        this.loadAll();
+        this.registerChangeIn<%= entityClassPlural %>();
+    }

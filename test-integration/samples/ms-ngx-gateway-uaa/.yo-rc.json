@@ -1,34 +1,29 @@
 {
-  "generator-jhipster": {
-    "baseName": "travisDefault",
-    "packageName": "io.github.jhipster.travis",
-    "packageFolder": "io/github/jhipster/travis",
-    "serverPort": "8080",
-    "authenticationType": "uaa",
-    "uaaBaseName": "travisUaa",
-    "cacheProvider": "hazelcast",
-    "enableHibernateCache": true,
-    "websocket": false,
-    "databaseType": "sql",
-    "devDatabaseType": "h2Disk",
-    "prodDatabaseType": "mysql",
-    "searchEngine": false,
-    "messageBroker": false,
-    "serviceDiscoveryType": "eureka",
-    "buildTool": "maven",
-    "useSass": false,
-    "applicationType": "gateway",
-    "testFrameworks": [
-      "gatling"
-    ],
-    "jhiPrefix": "jhi",
-    "enableTranslation": true,
-    "nativeLanguage": "en",
-    "languages": [
-      "en"
-    ],
-    "travis": true,
-    "clientPackageManager": "npm",
-    "clientFramework": "angularX"
-  }
+    "generator-jhipster": {
+        "baseName": "sampleGateway",
+        "packageName": "io.github.jhipster.sample",
+        "packageFolder": "io/github/jhipster/sample",
+        "serverPort": "8080",
+        "authenticationType": "uaa",
+        "uaaBaseName": "sampleUaa",
+        "cacheProvider": "hazelcast",
+        "enableHibernateCache": true,
+        "websocket": false,
+        "databaseType": "sql",
+        "devDatabaseType": "h2Disk",
+        "prodDatabaseType": "postgresql",
+        "searchEngine": false,
+        "messageBroker": false,
+        "serviceDiscoveryType": "eureka",
+        "buildTool": "maven",
+        "applicationType": "gateway",
+        "testFrameworks": ["gatling"],
+        "jhiPrefix": "jhi",
+        "enableTranslation": true,
+        "nativeLanguage": "en",
+        "languages": ["en"],
+        "clientPackageManager": "npm",
+        "clientFramework": "angularX",
+        "creationTimestamp": 1596513172471
+    }
 }

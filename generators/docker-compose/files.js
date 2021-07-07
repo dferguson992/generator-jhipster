@@ -1,5 +1,5 @@
 /**
- * Copyright 2013-2018 the original author or authors from the JHipster project.
+ * Copyright 2013-2020 the original author or authors from the JHipster project.
  *
  * This file is part of the JHipster project, see https://www.jhipster.tech/
  * for more information.
@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 module.exports = {
-    writeFiles
+    writeFiles,
 };
 
 function writeFiles() {
@@ -28,44 +28,31 @@ function writeFiles() {
         },
 
         writeRegistryFiles() {
-            if (this.serviceDiscoveryType === 'eureka') {
-                this.template('jhipster-registry.yml.ejs', 'jhipster-registry.yml');
-            }
             if (this.serviceDiscoveryType) {
                 this.template('central-server-config/application.yml.ejs', 'central-server-config/application.yml');
-            }
-            if (this.gatewayNb === 0 && this.microserviceNb === 0) return;
-            if (this.serviceDiscoveryType === 'consul') {
-                this.template('consul.yml.ejs', 'consul.yml');
             }
         },
 
         writeTraefikFiles() {
             if (this.gatewayType !== 'traefik') return;
-            this.template('traefik.yml.ejs', 'traefik.yml');
             this.template('traefik/traefik.toml.ejs', 'traefik/traefik.toml');
-        },
-
-        writeKafkaFiles() {
-            if (!this.useKafka) return;
-
-            this.template('kafka.yml.ejs', 'kafka.yml');
         },
 
         writeKeycloakFiles() {
             if (this.authenticationType === 'oauth2' && this.applicationType !== 'microservice') {
-                this.template('keycloak.yml.ejs', 'keycloak.yml');
                 this.template('realm-config/jhipster-realm.json.ejs', 'realm-config/jhipster-realm.json');
                 this.template('realm-config/jhipster-users-0.json.ejs', 'realm-config/jhipster-users-0.json');
             }
         },
 
-        writeElkFiles() {
-            if (this.monitoring !== 'elk') return;
-
-            this.template('jhipster-console.yml.ejs', 'jhipster-console.yml');
-            this.template('log-conf/logstash.conf.ejs', 'log-conf/logstash.conf');
-            this.template('log-data/.gitignore.ejs', 'log-data/.gitignore');
+        writeGatewayConfig() {
+            if (this.serviceDiscoveryType) {
+                this.appConfigs.forEach(appConfig => {
+                    if (appConfig.applicationType === 'gateway') {
+                        this.template('central-server-config/gateway.yml.ejs', `central-server-config/${appConfig.baseName}.yml`);
+                    }
+                });
+            }
         },
 
         writePrometheusFiles() {
@@ -74,16 +61,15 @@ function writeFiles() {
             // Generate a list of target apps to monitor for the prometheus config
             const appsToMonitor = [];
             for (let i = 0; i < this.appConfigs.length; i++) {
-                appsToMonitor.push(`             - ${this.appConfigs[i].baseName}-app:${this.appConfigs[i].serverPort}`);
+                appsToMonitor.push(`        - ${this.appConfigs[i].baseName}:${this.appConfigs[i].serverPort}`);
             }
 
             // Format the application target list as a YAML array
             this.appsToMonitorList = appsToMonitor.join('\n').replace(/'/g, '');
 
-            this.template('prometheus.yml.ejs', 'prometheus.yml');
             this.template('prometheus-conf/prometheus.yml.ejs', 'prometheus-conf/prometheus.yml');
-            this.template('prometheus-conf/alert.rules.ejs', 'prometheus-conf/alert.rules');
+            this.template('prometheus-conf/alert_rules.yml.ejs', 'prometheus-conf/alert_rules.yml');
             this.template('alertmanager-conf/config.yml.ejs', 'alertmanager-conf/config.yml');
-        }
+        },
     };
 }

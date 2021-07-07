@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2018 the original author or authors from the JHipster project.
+ Copyright 2013-2020 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -17,23 +17,32 @@
  limitations under the License.
 -%>
 <%
-const instanceType = (dto === 'mapstruct') ? entityClass + 'DTO' : entityClass;
+const instanceType = (dto === 'mapstruct') ? asDto(entityClass) : asEntity(entityClass);
 const mapper = entityInstance  + 'Mapper';
 const entityToDtoReference = mapper + '::' + 'toDto';
+const reactiveSql = (databaseType === 'sql' && reactive);
 for (const idx in relationships) { if (relationships[idx].relationshipType === 'one-to-one' && relationships[idx].ownerSide !== true) { %>
 
     /**
-     *  get all the <%= entityInstancePlural %> where <%= relationships[idx].relationshipNameCapitalized %> is null.
-     *  @return the list of entities
+     *  Get all the <%= entityInstancePlural %> where <%= relationships[idx].relationshipNameCapitalized %> is {@code null}.
+     *  @return the list of entities.
      */<% if (databaseType === 'sql') { %>
     @Transactional(readOnly = true) <% } %>
-    public List<<%= instanceType %>> findAllWhere<%= relationships[idx].relationshipNameCapitalized %>IsNull() {
+    public <%= reactiveSql ? 'Flux' : 'List' %><<%= instanceType %>> findAllWhere<%= relationships[idx].relationshipNameCapitalized %>IsNull() {
         log.debug("Request to get all <%= entityInstancePlural %> where <%= relationships[idx].relationshipNameCapitalized %> is null");
+        <%_ if (reactiveSql) { _%>
+        return <%= entityInstance %>Repository.findAllWhere<%= relationships[idx].relationshipNameCapitalized %>IsNull()<% if (dto === 'mapstruct') { _%>
+             .map(<%= entityToDtoReference %>)<%_ } _%>;
+        <%_ } else { _%>
         return StreamSupport
             .stream(<%= entityInstance %>Repository.findAll().spliterator(), false)
-            .filter(<%= entityInstance %> -> <%= entityInstance %>.get<%= relationships[idx].relationshipNameCapitalized %>() == null)<% if (dto === 'mapstruct') { %>
+            .filter(<%= entityInstance %> -> <%= entityInstance %>.get<%= relationships[idx].relationshipNameCapitalized %>() == null)
+            <%_ if (dto === 'mapstruct') { _%>
             .map(<%= entityToDtoReference %>)
-            .collect(Collectors.toCollection(LinkedList::new));<% } else { %>
-            .collect(Collectors.toList());<% } %>
+            .collect(Collectors.toCollection(LinkedList::new));
+            <%_ } else { _%>
+            .collect(Collectors.toList());
+            <%_ } _%>
+        <%_ } _%>
     }
 <% } } %>

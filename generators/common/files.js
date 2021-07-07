@@ -1,5 +1,5 @@
 /**
- * Copyright 2013-2018 the original author or authors from the JHipster project.
+ * Copyright 2013-2020 the original author or authors from the JHipster project.
  *
  * This file is part of the JHipster project, see https://www.jhipster.tech/
  * for more information.
@@ -21,6 +21,14 @@
  * The default is to use a file path string. It implies use of the template method.
  * For any other config an object { file:.., method:.., template:.. } can be used
  */
+const prettierConfigFiles = {
+    global: [
+        {
+            templates: ['.prettierrc', '.prettierignore'],
+        },
+    ],
+};
+
 const commonFiles = {
     global: [
         {
@@ -28,32 +36,43 @@ const commonFiles = {
                 'README.md',
                 {
                     file: 'gitignore',
-                    renameTo: () => '.gitignore'
+                    renameTo: () => '.gitignore',
                 },
                 {
                     file: 'gitattributes',
                     renameTo: () => '.gitattributes',
-                    method: 'copy'
+                    method: 'copy',
                 },
                 {
                     file: 'editorconfig',
                     renameTo: () => '.editorconfig',
-                    method: 'copy'
-                }
-            ]
-        }
-    ]
+                    method: 'copy',
+                },
+                {
+                    file: 'sonar-project.properties',
+                    renameTo: () => 'sonar-project.properties',
+                },
+            ],
+        },
+    ],
+    commitHooks: [
+        {
+            condition: generator => !generator.skipCommitHook,
+            templates: ['.huskyrc', '.lintstagedrc.js'],
+        },
+    ],
 };
 
 function writeFiles() {
     return {
         writeFiles() {
             this.writeFilesToDisk(commonFiles, this, false, this.fetchFromInstalledJHipster('common/templates'));
-        }
+        },
     };
 }
 
 module.exports = {
     writeFiles,
-    commonFiles
+    prettierConfigFiles,
+    commonFiles,
 };

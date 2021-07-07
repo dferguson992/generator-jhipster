@@ -6,8 +6,8 @@ const expectedFiles = require('./utils/expected-files');
 const angularfiles = require('../generators/client/files-angular').files;
 
 describe('JHipster server generator', () => {
-    describe('generate server', () => {
-        beforeEach(done => {
+    describe('generate server with ehcache', () => {
+        before(done => {
             helpers
                 .run(path.join(__dirname, '../generators/server'))
                 .withOptions({ skipInstall: true, skipChecks: true })
@@ -21,13 +21,13 @@ describe('JHipster server generator', () => {
                     enableHibernateCache: true,
                     databaseType: 'sql',
                     devDatabaseType: 'h2Memory',
-                    prodDatabaseType: 'mysql',
+                    prodDatabaseType: 'postgresql',
                     enableTranslation: true,
                     nativeLanguage: 'en',
                     languages: ['fr'],
                     buildTool: 'maven',
                     rememberMeKey: '5c37379956bd1242f5636c8cb322c2966ad81277',
-                    serverSideOptions: []
+                    serverSideOptions: [],
                 })
                 .on('end', done);
         });
@@ -36,16 +36,68 @@ describe('JHipster server generator', () => {
             assert.noFile(expectedFiles.common);
             assert.file(expectedFiles.server);
             assert.file(expectedFiles.jwtServer);
+            assert.file(expectedFiles.userManagementServer);
             assert.file(expectedFiles.maven);
+            assert.file(expectedFiles.postgresql);
+            assert.file(expectedFiles.hibernateTimeZoneConfig);
             assert.noFile(
                 getFilesForOptions(
                     angularfiles,
                     {
-                        useSass: false,
                         enableTranslation: true,
                         serviceDiscoveryType: false,
                         authenticationType: 'jwt',
-                        testFrameworks: []
+                        testFrameworks: [],
+                    },
+                    null,
+                    ['package.json']
+                )
+            );
+        });
+    });
+
+    describe('generate server with caffeine', () => {
+        before(done => {
+            helpers
+                .run(path.join(__dirname, '../generators/server'))
+                .withOptions({ skipInstall: true, skipChecks: true })
+                .withPrompts({
+                    baseName: 'jhipster',
+                    packageName: 'com.mycompany.myapp',
+                    packageFolder: 'com/mycompany/myapp',
+                    serviceDiscoveryType: false,
+                    authenticationType: 'jwt',
+                    cacheProvider: 'caffeine',
+                    enableHibernateCache: true,
+                    databaseType: 'sql',
+                    devDatabaseType: 'h2Memory',
+                    prodDatabaseType: 'postgresql',
+                    enableTranslation: true,
+                    nativeLanguage: 'en',
+                    languages: ['fr'],
+                    buildTool: 'maven',
+                    rememberMeKey: '5c37379956bd1242f5636c8cb322c2966ad81277',
+                    serverSideOptions: [],
+                })
+                .on('end', done);
+        });
+
+        it('creates expected files for caffeine cache configuration for server generator', () => {
+            assert.noFile(expectedFiles.common);
+            assert.file(expectedFiles.server);
+            assert.file(expectedFiles.jwtServer);
+            assert.file(expectedFiles.userManagementServer);
+            assert.file(expectedFiles.maven);
+            assert.file(expectedFiles.postgresql);
+            assert.file(expectedFiles.hibernateTimeZoneConfig);
+            assert.noFile(
+                getFilesForOptions(
+                    angularfiles,
+                    {
+                        enableTranslation: true,
+                        serviceDiscoveryType: false,
+                        authenticationType: 'jwt',
+                        testFrameworks: [],
                     },
                     null,
                     ['package.json']

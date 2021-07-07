@@ -1,7 +1,7 @@
 {
   "generator-jhipster": {
     "applicationType": "monolith",
-    "baseName": "sampleMysql",
+    "baseName": "samplePsql",
     "packageName": "com.mycompany.myapp",
     "packageFolder": "com/mycompany/myapp",
     "authenticationType": "session",
@@ -9,10 +9,9 @@
     "websocket": "no",
     "databaseType": "sql",
     "devDatabaseType": "h2Disk",
-    "prodDatabaseType": "mysql",
+    "prodDatabaseType": "postgresql",
     "searchEngine": "elasticsearch",
-    "useSass": false,
-    "buildTool": "maven",
+        "buildTool": "maven",
     "enableTranslation": true,
     "nativeLanguage": "en",
     "languages": [

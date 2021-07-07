@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2018 the original author or authors from the JHipster project.
+ Copyright 2013-2020 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -20,22 +20,64 @@ rootProject.name=<%= dasherizedBaseName %>
 profile=dev
 
 # Build properties
-node_version=<%= NODE_VERSION %>
-npm_version=<%= NPM_VERSION %>
-yarn_version=<%= YARN_VERSION %>
+nodeVersion=<%= NODE_VERSION %>
+npmVersion=<%= NPM_VERSION %>
 
 # Dependency versions
-jhipster_dependencies_version=2.0.28
+jhipsterDependenciesVersion=<%= JHIPSTER_DEPENDENCIES_VERSION %>
 # The spring-boot version should match the one managed by
-# https://mvnrepository.com/artifact/io.github.jhipster/jhipster-dependencies/${jhipster_dependencies_version}
-spring_boot_version=2.0.6.RELEASE
+# https://mvnrepository.com/artifact/io.github.jhipster/jhipster-dependencies/<%= JHIPSTER_DEPENDENCIES_VERSION %>
+springBootVersion=<%= SPRING_BOOT_VERSION %>
 # The hibernate version should match the one managed by
-# https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies/${spring-boot.version} -->
-hibernate_version=5.2.17.Final
-mapstruct_version=1.2.0.Final
-
-liquibase_hibernate5_version=3.6
+# https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies/<%= SPRING_BOOT_VERSION %> -->
+hibernateVersion=<%= HIBERNATE_VERSION %>
+mapstructVersion=1.4.1.Final
+archunitJunit5Version=0.14.1
+<%_ if (enableSwaggerCodegen) { _%>
+jacksonDatabindNullableVersion=<%= JACKSON_DATABIND_NULLABLE_VERSION %>
+<%_ } _%>
+<%_ if (cacheProvider === 'caffeine') { _%>
+caffeineVersion=2.8.5
+typesafeConfigVersion=1.4.0
+<%_ } _%>
+<%_ if (databaseType === 'sql' && !reactive) { _%>
+liquibaseHibernate5Version=3.10.2
 liquibaseTaskPrefix=liquibase
+<%_ } _%>
+
+<%_ if (reactive) { _%>
+blockhoundJunitPlatformVersion=1.0.4.RELEASE
+junitPlatformLauncherVersion=1.6.2
+r2dbcMariadbVersion=0.8.2-alpha2
+<%_ } _%>
+
+<%_ if (databaseType === 'sql' || authenticationType === 'uaa') { _%>
+jaxbRuntimeVersion=2.3.3
+<%_ } _%>
+<%_ if (databaseType === 'cassandra') { _%>
+# The cassandra driver version should match the one managed by
+# https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies/<%= SPRING_BOOT_VERSION %>
+cassandraDriverVersion=4.6.1
+<%_ } _%>
+
+# gradle plugin version
+jibPluginVersion=<%= JIB_VERSION %>
+gitPropertiesPluginVersion=2.2.3
+<%_ if (!skipClient) { _%>
+gradleNodePluginVersion=2.2.4
+<%_ } _%>
+aptPluginVersion=0.21
+<%_ if (databaseType === 'sql' && !reactive) { _%>
+liquibasePluginVersion=2.0.4
+<%_ } _%>
+sonarqubePluginVersion=3.0
+<%_ if (enableSwaggerCodegen) { _%>
+openapiPluginVersion=4.3.1
+<%_ } _%>
+springNoHttpPluginVersion=0.0.5.RELEASE
+checkstyleVersion=8.36
+
+# jhipster-needle-gradle-property - JHipster will add additional properties here
 
 ## below are some of the gradle performance improvement settings that can be used as required, these are not enabled by default
 
@@ -43,27 +85,27 @@ liquibaseTaskPrefix=liquibase
 ## The daemon is enabled by default in Gradle 3+ setting this to false will disable this.
 ## TODO: disable daemon on CI, since builds should be clean and reliable on servers
 ## https://docs.gradle.org/current/userguide/gradle_daemon.html#sec:ways_to_disable_gradle_daemon
-## un comment the below line to disable the daemon
+## uncomment the below line to disable the daemon
 
 #org.gradle.daemon=false
 
 ## Specifies the JVM arguments used for the daemon process.
 ## The setting is particularly useful for tweaking memory settings.
 ## Default value: -Xmx1024m -XX:MaxPermSize=256m
-## un comment the below line to override the daemon defaults
+## uncomment the below line to override the daemon defaults
 
 #org.gradle.jvmargs=-Xmx1024m -XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
 
 ## When configured, Gradle will run in incubating parallel mode.
 ## This option should only be used with decoupled projects. More details, visit
 ## http://www.gradle.org/docs/current/userguide/multi_project_builds.html#sec:decoupled_projects
-## un comment the below line to enable parallel mode
+## uncomment the below line to enable parallel mode
 
 #org.gradle.parallel=true
 
 ## Enables new incubating mode that makes Gradle selective when configuring projects.
 ## Only relevant projects are configured which results in faster builds for large multi-projects.
 ## http://www.gradle.org/docs/current/userguide/multi_project_builds.html#sec:configuration_on_demand
-## un comment the below line to enable the selective mode
+## uncomment the below line to enable the selective mode
 
 #org.gradle.configureondemand=true

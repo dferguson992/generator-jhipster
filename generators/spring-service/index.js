@@ -1,5 +1,5 @@
 /**
- * Copyright 2013-2018 the original author or authors from the JHipster project.
+ * Copyright 2013-2020 the original author or authors from the JHipster project.
  *
  * This file is part of the JHipster project, see https://www.jhipster.tech/
  * for more information.
@@ -18,72 +18,55 @@
  */
 /* eslint-disable consistent-return */
 const _ = require('lodash');
-const chalk = require('chalk');
-const BaseGenerator = require('../generator-base');
+const BaseBlueprintGenerator = require('../generator-base-blueprint');
 const constants = require('../generator-constants');
 const statistics = require('../statistics');
 
 const SERVER_MAIN_SRC_DIR = constants.SERVER_MAIN_SRC_DIR;
 
-let useBlueprint;
-module.exports = class extends BaseGenerator {
+let useBlueprints;
+module.exports = class extends BaseBlueprintGenerator {
     constructor(args, opts) {
         super(args, opts);
+
         this.argument('name', { type: String, required: true });
         this.name = this.options.name;
         // This adds support for a `--from-cli` flag
         this.option('from-cli', {
             desc: 'Indicates the command is run from JHipster CLI',
             type: Boolean,
-            defaults: false
+            defaults: false,
         });
         this.option('default', {
             type: Boolean,
             default: false,
-            description: 'default option'
+            description: 'default option',
         });
         this.defaultOption = this.options.default;
 
-        const blueprint = this.config.get('blueprint');
-        if (!opts.fromBlueprint) {
-            // use global variable since getters dont have access to instance property
-            useBlueprint = this.composeBlueprint(blueprint, 'spring-service', {
-                'from-cli': this.options['from-cli'],
-                force: this.options.force,
-                arguments: [this.name],
-                default: this.options.default
-            });
-        } else {
-            useBlueprint = false;
-        }
+        useBlueprints = !this.fromBlueprint && this.instantiateBlueprints('spring-service', { arguments: [this.name] });
     }
 
     // Public API method used by the getter and also by Blueprints
     _initializing() {
         return {
             validateFromCli() {
-                if (!this.options['from-cli']) {
-                    this.warning(
-                        `Deprecated: JHipster seems to be invoked using Yeoman command. Please use the JHipster CLI. Run ${chalk.red(
-                            'jhipster <command>'
-                        )} instead of ${chalk.red('yo jhipster:<command>')}`
-                    );
-                }
+                this.checkInvocationFromCLI();
             },
 
             initializing() {
                 this.log(`The service ${this.name} is being created.`);
-                const configuration = this.getAllJhipsterConfig(this, true);
+                const configuration = this.config;
                 this.baseName = configuration.get('baseName');
                 this.packageName = configuration.get('packageName');
                 this.packageFolder = configuration.get('packageFolder');
                 this.databaseType = configuration.get('databaseType');
-            }
+            },
         };
     }
 
     get initializing() {
-        if (useBlueprint) return;
+        if (useBlueprints) return;
         return this._initializing();
     }
 
@@ -96,8 +79,8 @@ module.exports = class extends BaseGenerator {
                         type: 'confirm',
                         name: 'useInterface',
                         message: '(1/1) Do you want to use an interface for your service?',
-                        default: false
-                    }
+                        default: false,
+                    },
                 ];
                 if (!this.defaultOption) {
                     const done = this.async();
@@ -108,12 +91,12 @@ module.exports = class extends BaseGenerator {
                 } else {
                     this.useInterface = true;
                 }
-            }
+            },
         };
     }
 
     get prompting() {
-        if (useBlueprint) return;
+        if (useBlueprints) return;
         return this._prompting();
     }
 
@@ -122,12 +105,12 @@ module.exports = class extends BaseGenerator {
         return {
             insight() {
                 statistics.sendSubGenEvent('generator', 'service', { interface: this.useInterface });
-            }
+            },
         };
     }
 
     get default() {
-        if (useBlueprint) return;
+        if (useBlueprints) return;
         return this._default();
     }
 
@@ -151,12 +134,12 @@ module.exports = class extends BaseGenerator {
                         `${SERVER_MAIN_SRC_DIR + this.packageFolder}/service/impl/${this.serviceClass}Impl.java`
                     );
                 }
-            }
+            },
         };
     }
 
     get writing() {
-        if (useBlueprint) return;
+        if (useBlueprints) return;
         return this._writing();
     }
 };

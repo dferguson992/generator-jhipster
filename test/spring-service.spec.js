@@ -8,7 +8,7 @@ const SERVER_MAIN_SRC_DIR = constants.SERVER_MAIN_SRC_DIR;
 
 describe('JHipster generator service', () => {
     describe('creates service without interface', () => {
-        beforeEach(done => {
+        before(done => {
             helpers
                 .run(require.resolve('../generators/spring-service'))
                 .inTmpDir(dir => {
@@ -16,7 +16,7 @@ describe('JHipster generator service', () => {
                 })
                 .withArguments(['foo'])
                 .withPrompts({
-                    useInterface: false
+                    useInterface: false,
                 })
                 .on('end', done);
         });
@@ -31,7 +31,7 @@ describe('JHipster generator service', () => {
     });
 
     describe('creates service with interface', () => {
-        beforeEach(done => {
+        before(done => {
             helpers
                 .run(require.resolve('../generators/spring-service'))
                 .inTmpDir(dir => {
@@ -39,7 +39,7 @@ describe('JHipster generator service', () => {
                 })
                 .withArguments(['foo'])
                 .withPrompts({
-                    useInterface: true
+                    useInterface: true,
                 })
                 .on('end', done);
         });
@@ -47,13 +47,13 @@ describe('JHipster generator service', () => {
         it('creates service file', () => {
             assert.file([
                 `${SERVER_MAIN_SRC_DIR}com/mycompany/myapp/service/FooService.java`,
-                `${SERVER_MAIN_SRC_DIR}com/mycompany/myapp/service/impl/FooServiceImpl.java`
+                `${SERVER_MAIN_SRC_DIR}com/mycompany/myapp/service/impl/FooServiceImpl.java`,
             ]);
         });
     });
 
     describe('creates service with --default flag', () => {
-        beforeEach(done => {
+        before(done => {
             helpers
                 .run(require.resolve('../generators/spring-service'))
                 .inTmpDir(dir => {
@@ -67,7 +67,7 @@ describe('JHipster generator service', () => {
         it('creates service file', () => {
             assert.file([
                 `${SERVER_MAIN_SRC_DIR}com/mycompany/myapp/service/FooService.java`,
-                `${SERVER_MAIN_SRC_DIR}com/mycompany/myapp/service/impl/FooServiceImpl.java`
+                `${SERVER_MAIN_SRC_DIR}com/mycompany/myapp/service/impl/FooServiceImpl.java`,
             ]);
         });
     });

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2018 the original author or authors from the JHipster project.
+ Copyright 2013-2020 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://www.jhipster.tech/
  for more information.
@@ -16,51 +16,41 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
-import { <%= angularXAppName %>SharedModule } from 'app/shared';
-<%_ Object.keys(differentRelationships).forEach(key => {
-       if (key === 'User') { _%>
-import { <%= angularXAppName %>AdminModule } from 'app/admin/admin.module';
-<%_ }}); _%>
-import {
-    <%= entityAngularName %>Component,
-    <%= entityAngularName %>DetailComponent,
-    <%= entityAngularName %>UpdateComponent,
-    <%= entityAngularName %>DeletePopupComponent,
-    <%= entityAngularName %>DeleteDialogComponent,
-    <%= entityInstance %>Route,
-    <%= entityInstance %>PopupRoute
-} from './';
-
-const ENTITY_STATES = [
-    ...<%= entityInstance %>Route,
-    ...<%= entityInstance %>PopupRoute,
-];
+import { SharedModule } from 'app/shared/shared.module';
+import { <%= entityAngularName %>Component } from './<%= entityFileName %>.component';
+import { <%= entityAngularName %>DetailComponent } from './<%= entityFileName %>-detail.component';
+<%_ if (!readOnly) { _%>
+import { <%= entityAngularName %>UpdateComponent } from './<%= entityFileName %>-update.component';
+import { <%= entityAngularName %>DeleteDialogComponent } from './<%= entityFileName %>-delete-dialog.component';
+<%_ } _%>
 
 @NgModule({
     imports: [
-        <%= angularXAppName %>SharedModule,
-        <%_ Object.keys(differentRelationships).forEach(key => {
-              if (key === 'User') { _%>
-        <%= angularXAppName %>AdminModule,
-        <%_ }}); _%>
-        RouterModule.forChild(ENTITY_STATES)
+        SharedModule,
+        RouterModule,
     ],
     declarations: [
         <%= entityAngularName %>Component,
         <%= entityAngularName %>DetailComponent,
+        <%_ if (!readOnly) { _%>
         <%= entityAngularName %>UpdateComponent,
         <%= entityAngularName %>DeleteDialogComponent,
-        <%= entityAngularName %>DeletePopupComponent,
+        <%_ } %>
     ],
+    exports: [
+        <%= entityAngularName %>DetailComponent,
+        <%_ if (!readOnly) { _%>
+        <%= entityAngularName %>UpdateComponent,
+        <%= entityAngularName %>DeleteDialogComponent,
+        <%_ } %>
+    ],
+    <%_ if (!readOnly) { _%>
     entryComponents: [
-        <%= entityAngularName %>Component,
-        <%= entityAngularName %>UpdateComponent,
-        <%= entityAngularName %>DeleteDialogComponent,
-        <%= entityAngularName %>DeletePopupComponent,
-    ],
-    schemas: [CUSTOM_ELEMENTS_SCHEMA]
+        <%= entityAngularName %>DeleteDialogComponent
+    ]
+    <%_ } _%>
 })
-export class <%= angularXAppName %><%= entityAngularName %>Module {}
+export class <%= locals.microserviceName ? upperFirstCamelCase(locals.microserviceName) : '' %><%= entityAngularName %>Module {}

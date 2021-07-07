@@ -15,36 +15,43 @@ const mockBlueprintSubGen = class extends EntityGenerator {
         const jhContext = (this.jhipsterContext = this.options.jhipsterContext);
 
         if (!jhContext) {
-            this.error('This is a JHipster blueprint and should be used only like jhipster --blueprint myblueprint');
+            this.error('This is a JHipster blueprint and should be used only like jhipster --blueprints myblueprint');
         }
 
         this.configOptions = jhContext.configOptions || {};
-        // This sets up options for this sub generator and is being reused from JHipster
-        jhContext.setupEntityOptions(this, jhContext, this);
     }
 
     get initializing() {
         const phaseFromJHipster = super._initializing();
-        const customPhaseSteps = {
+        const customPrePhaseSteps = {
+            // Create a custom persistent entity config.
+            createCustomConfig() {
+                // Override with new value
+                this.entityConfig.customBlueprintConfigKey = 'customBlueprintConfigValue';
+            },
+        };
+        const customPostPhaseSteps = {
             changeProperty() {
-                // TODO check why this doesnt work
-                // this.context.name = 'newBaseName';
-            }
+                this.context.frontendAppName = 'awesomeApp';
+            },
         };
         return {
+            ...customPrePhaseSteps,
             ...phaseFromJHipster,
-            ...customPhaseSteps
+            ...customPostPhaseSteps,
         };
     }
 
     get prompting() {
-        // Here we are not overriding this phase and hence its being handled by JHipster
         return super._prompting();
     }
 
     get configuring() {
-        // Here we are not overriding this phase and hence its being handled by JHipster
         return super._configuring();
+    }
+
+    get default() {
+        return super._default();
     }
 
     get writing() {
@@ -52,8 +59,11 @@ const mockBlueprintSubGen = class extends EntityGenerator {
     }
 
     get install() {
-        // Here we are not overriding this phase and hence its being handled by JHipster
         return super._install();
+    }
+
+    get end() {
+        return super._end();
     }
 };
 
@@ -66,14 +76,14 @@ describe('JHipster entity generator with blueprint', () => {
                 helpers
                     .run(path.join(__dirname, '../../generators/entity'))
                     .inTmpDir(dir => {
-                        fse.copySync(path.join(__dirname, '../../test/templates/default-ng2'), dir);
+                        fse.copySync(path.join(__dirname, '../../test/templates/ngx-blueprint'), dir);
                     })
-                    .withArguments('foo')
+                    .withArguments(['foo'])
                     .withOptions({
-                        'from-cli': true,
+                        fromCli: true,
                         skipInstall: true,
                         blueprint: blueprintName,
-                        skipChecks: true
+                        skipChecks: true,
                     })
                     .withGenerators([[mockBlueprintSubGen, 'jhipster-myblueprint:entity']])
                     .withPrompts({
@@ -81,7 +91,7 @@ describe('JHipster entity generator with blueprint', () => {
                         relationshipAdd: false,
                         dto: 'no',
                         service: 'no',
-                        pagination: 'no'
+                        pagination: 'no',
                     })
                     .on('end', done);
             });
@@ -92,10 +102,46 @@ describe('JHipster entity generator with blueprint', () => {
                 assert.file(`${CLIENT_MAIN_SRC_DIR}i18n/en/foo.json`);
             });
 
-            // TODO check why this doesnt work
-            // it('contains the specific change added by the blueprint', () => {
-            //     assert.fileContent(`${CLIENT_MAIN_SRC_DIR}i18n/en/foo.json`, /dummyBlueprintProperty/);
-            // });
+            it('contains the specific change added by the blueprint', () => {
+                assert.fileContent(`${CLIENT_MAIN_SRC_DIR}i18n/en/foo.json`, /awesomeApp/);
+            });
+
+            // Verify if the custom entity config is persisted.
+            it('contains the specific config added by the blueprint', () => {
+                assert.fileContent('.jhipster/Foo.json', /"customBlueprintConfigKey": "customBlueprintConfigValue"/);
+            });
+        });
+    });
+
+    describe('generate entity with dummy blueprint overriding everything', () => {
+        before(done => {
+            helpers
+                .run(path.join(__dirname, '../../generators/entity'))
+                .inTmpDir(dir => {
+                    fse.copySync(path.join(__dirname, '../../test/templates/ngx-blueprint'), dir);
+                })
+                .withOptions({
+                    fromCli: true,
+                    skipInstall: true,
+                    blueprint: 'myblueprint',
+                    skipChecks: true,
+                })
+                .withGenerators([[helpers.createDummyGenerator(), 'jhipster-myblueprint:entity']])
+                .withArguments(['foo'])
+                .withPrompts({
+                    fieldAdd: false,
+                    relationshipAdd: false,
+                    dto: 'no',
+                    service: 'no',
+                    pagination: 'no',
+                })
+                .on('end', done);
+        });
+
+        it("doesn't create any expected files from jhipster entity generator", () => {
+            assert.noFile(expectedFiles.server);
+            assert.noFile(expectedFiles.clientNg2);
+            assert.noFile(`${CLIENT_MAIN_SRC_DIR}i18n/en/foo.json`);
         });
     });
 });

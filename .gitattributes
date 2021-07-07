@@ -19,6 +19,7 @@
 *.gz binary
 *.ai binary
 *.eps binary
+*.ico binary
 
 # Used by GitHub to determine which language is used
 # See https://github.com/github/linguist
@@ -32,3 +33,4 @@
 *.yml.ejs linguist-language=YAML
 *.json.ejs linguist-language=JSON
 *.xml.ejs linguist-language=XML
+*.vue.ejs linguist-language=Vue

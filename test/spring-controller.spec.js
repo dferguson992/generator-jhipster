@@ -9,7 +9,7 @@ const SERVER_TEST_SRC_DIR = constants.SERVER_TEST_SRC_DIR;
 
 describe('JHipster generator spring-controller', () => {
     describe('creates spring controller', () => {
-        beforeEach(done => {
+        before(done => {
             helpers
                 .run(require.resolve('../generators/spring-controller'))
                 .inTmpDir(dir => {
@@ -17,7 +17,7 @@ describe('JHipster generator spring-controller', () => {
                 })
                 .withArguments(['foo'])
                 .withPrompts({
-                    actionAdd: false
+                    actionAdd: false,
                 })
                 .on('end', done);
         });
@@ -25,12 +25,12 @@ describe('JHipster generator spring-controller', () => {
         it('creates controller files', () => {
             assert.file([`${SERVER_MAIN_SRC_DIR}com/mycompany/myapp/web/rest/FooResource.java`]);
 
-            assert.file([`${SERVER_TEST_SRC_DIR}com/mycompany/myapp/web/rest/FooResourceIntTest.java`]);
+            assert.file([`${SERVER_TEST_SRC_DIR}com/mycompany/myapp/web/rest/FooResourceIT.java`]);
         });
     });
 
     describe('creates spring controller with --default flag', () => {
-        beforeEach(done => {
+        before(done => {
             helpers
                 .run(require.resolve('../generators/spring-controller'))
                 .inTmpDir(dir => {
@@ -44,7 +44,7 @@ describe('JHipster generator spring-controller', () => {
         it('creates controller files', () => {
             assert.file([`${SERVER_MAIN_SRC_DIR}com/mycompany/myapp/web/rest/FooResource.java`]);
 
-            assert.file([`${SERVER_TEST_SRC_DIR}com/mycompany/myapp/web/rest/FooResourceIntTest.java`]);
+            assert.file([`${SERVER_TEST_SRC_DIR}com/mycompany/myapp/web/rest/FooResourceIT.java`]);
         });
     });
 });

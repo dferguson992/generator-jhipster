@@ -1,5 +1,5 @@
 /**
- * Copyright 2013-2018 the original author or authors from the JHipster project.
+ * Copyright 2013-2020 the original author or authors from the JHipster project.
  *
  * This file is part of the JHipster project, see https://www.jhipster.tech/
  * for more information.
@@ -18,7 +18,7 @@
  */
 const fs = require('fs');
 
-const FILE_EXTENSION = '.original';
+const FILE_EXTENSION = '.war';
 const S3_STANDARD_REGION = 'us-east-1';
 
 let Progressbar;
@@ -38,7 +38,7 @@ S3.prototype.createBucket = function createBucket(params, callback) {
 
     const s3Params = {
         Bucket: bucket,
-        CreateBucketConfiguration: { LocationConstraint: region }
+        CreateBucketConfiguration: { LocationConstraint: region },
     };
 
     if (region === S3_STANDARD_REGION) {
@@ -47,7 +47,7 @@ S3.prototype.createBucket = function createBucket(params, callback) {
 
     const s3 = new this.Aws.S3({
         params: s3Params,
-        signatureVersion: 'v4'
+        signatureVersion: 'v4',
     });
 
     s3.headBucket(err => {
@@ -80,22 +80,20 @@ S3.prototype.uploadWar = function uploadWar(params, callback) {
         buildFolder = 'target/';
     }
 
-    findWarFilename(buildFolder, (err, warFilename) => {
+    findWarFilename(buildFolder, (err, warKey) => {
         if (err) {
             error(err, callback);
         } else {
-            const warKey = warFilename.slice(0, -FILE_EXTENSION.length);
-
             const s3 = new this.Aws.S3({
                 params: {
                     Bucket: bucket,
-                    Key: warKey
+                    Key: warKey,
                 },
                 signatureVersion: 'v4',
-                httpOptions: { timeout: 600000 }
+                httpOptions: { timeout: 600000 },
             });
 
-            const filePath = buildFolder + warFilename;
+            const filePath = buildFolder + warKey;
             const body = fs.createReadStream(filePath);
 
             uploadToS3(s3, body, (err, message) => {
@@ -115,9 +113,7 @@ function findWarFilename(buildFolder, callback) {
         if (err) {
             error(err, callback);
         }
-        files.filter(file => file.substr(-FILE_EXTENSION.length) === FILE_EXTENSION).forEach(file => {
-            warFilename = file;
-        });
+        files.filter(file => file.substr(-FILE_EXTENSION.length) === FILE_EXTENSION).forEach(file => (warFilename = file)); // eslint-disable-line
         callback(null, warFilename);
     });
 }
@@ -138,7 +134,7 @@ function uploadToS3(s3, body, callback) {
                             incomplete: ' ',
                             width: 20,
                             total,
-                            clear: true
+                            clear: true,
                         });
                     }
 
